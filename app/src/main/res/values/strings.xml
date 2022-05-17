@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MyCinema</string>
+    <string-array name="genres">
+        <item>Все</item>
+        <item>Ужасы</item>
+        <item>Фантастика</item>
+        <item>Трейлер</item>
+        <item>Комедия</item>
+    </string-array>
+</resources>
