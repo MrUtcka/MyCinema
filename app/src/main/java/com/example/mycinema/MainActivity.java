@@ -7,11 +7,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -21,18 +22,20 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mycinema.model.Film;
 import com.example.mycinema.model.Genre;
+import com.example.mycinema.model.Role;
 import com.example.mycinema.model.Schedule;
+import com.example.mycinema.model.User;
 import com.example.mycinema.viewModel.FilmViewModel;
-import com.google.android.material.navigation.NavigationBarView;
-import com.j256.ormlite.stmt.query.In;
+import com.google.android.material.navigation.NavigationView;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -44,6 +47,16 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinner;
     GenreDAO genreDao;
     FilmDAO filmDao;
+    String role;
+    String selected;
+    List<FilmViewModel> films;
+    //FilmAdapter filmAdapter;
+
+    List<String> items = new ArrayList<>();
+    ArrayList<String> listItems;
+    ArrayAdapter<String> searchAdapter;
+    ListView listView;
+    EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +65,13 @@ public class MainActivity extends AppCompatActivity {
 
         List<Genre> genres = new ArrayList<Genre>();
         List<String> genresList = new ArrayList<String>();
-        List<FilmViewModel> films = new ArrayList<FilmViewModel>();
+        films = new ArrayList<FilmViewModel>();
+
+        Bundle arguments = getIntent().getExtras();
+
+        if(arguments != null) {
+            role = arguments.getString("role");
+        }
 
         try {
             genreDao = HelperFactory.getHelper().getGenreDao();
@@ -66,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 filmViewModel.setId(item.getId());
                 Schedule date = new Schedule();
                 date.setDate(new Date());
+                items.add(item.getName());
                 filmViewModel.setSchedule(date);
                 filmViewModel.setDescription(item.getDescription());
                 films.add(filmViewModel);
@@ -88,10 +108,10 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        RecyclerView recyclerView = findViewById(R.id.filmRecyclingView);
+        /*RecyclerView recyclerView = findViewById(R.id.filmRecyclingView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        FilmAdapter filmAdapter = new FilmAdapter(this, films, filmClickListener);
-        recyclerView.setAdapter(filmAdapter);
+        filmAdapter = new FilmAdapter(this, films, filmClickListener);
+        recyclerView.setAdapter(filmAdapter);*/
 
         spinner = findViewById(R.id.spGenre);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -102,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String selected = spinner.getSelectedItem().toString();
+                selected = spinner.getSelectedItem().toString();
 
                 Toast.makeText(getApplicationContext(), selected, Toast.LENGTH_SHORT).show();
             }
@@ -112,6 +132,88 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        listView=(ListView)findViewById(R.id.listview);
+        editText=(EditText)findViewById(R.id.txtsearch);
+        initList();
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s.toString().equals("")){
+
+                    initList();
+                } else {
+
+                    searchItem(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            FilmViewModel currfilm;
+            @Override
+            public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
+                Toast.makeText(getApplicationContext(), String.valueOf(position), Toast.LENGTH_LONG).show();
+                currfilm = films.get(position);
+                Intent i = new Intent(getApplicationContext(), ViewActivity.class);
+                i.putExtra("name", currfilm.getName());
+                i.putExtra("description", currfilm.getDescription());
+                i.putExtra("genre", currfilm.getGenre().getName());
+                startActivity(i);
+            }
+        });
+    }
+
+    public void searchItem(String textToSearch){
+        int i = 0;
+        for(String item:items){
+            if(!item.contains(textToSearch) && !selected.equals(films.get(i).getGenre().getName())){
+                listItems.remove(item);
+
+            }
+            i++;
+        }
+        searchAdapter.notifyDataSetChanged();
+    }
+
+    public void initList(){
+        listItems=new ArrayList<>();
+        for (String item: items) {
+            listItems.add(item);
+        }
+        searchAdapter=new ArrayAdapter<String>(this, R.layout.film_item, R.id.name, listItems);
+        listView.setAdapter(searchAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int i = item.getItemId();
+        if(i == R.id.action && role.equals("admin")) {
+            Intent intent = new Intent(getApplicationContext(), AddActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }
 

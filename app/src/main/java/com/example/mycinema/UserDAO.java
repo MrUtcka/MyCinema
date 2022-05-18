@@ -7,6 +7,8 @@ import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -16,11 +18,8 @@ public class UserDAO extends BaseDaoImpl<User, Integer> {
         super(connectionSource, dataClass);
     }
 
-//    public List<Role> getAllRoles() throws SQLException{
-//        return this.queryForAll();
-//    }
-
     public User getUserByEmail(String email) {
+
         if (email == null)
             return null;
 

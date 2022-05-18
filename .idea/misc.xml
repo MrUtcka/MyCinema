@@ -3,10 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/MyCinema/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1445" />
+        <entry key="..\:/MyCinema/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1445" />
         <entry key="..\:/MyCinema/app/src/main/res/layout/activity_main.xml" value="0.36666666666666664" />
+        <entry key="..\:/MyCinema/app/src/main/res/layout/add.xml" value="0.31354166666666666" />
         <entry key="..\:/MyCinema/app/src/main/res/layout/film_item.xml" value="0.36666666666666664" />
         <entry key="..\:/MyCinema/app/src/main/res/layout/item_list.xml" value="0.36666666666666664" />
+        <entry key="..\:/MyCinema/app/src/main/res/layout/login.xml" value="0.12552083333333333" />
+        <entry key="..\:/MyCinema/app/src/main/res/layout/main_menu.xml" value="0.15677083333333333" />
+        <entry key="..\:/MyCinema/app/src/main/res/layout/menu.xml" value="0.31354166666666666" />
+        <entry key="..\:/MyCinema/app/src/main/res/layout/pay.xml" value="0.36666666666666664" />
         <entry key="..\:/MyCinema/app/src/main/res/layout/view.xml" value="0.36666666666666664" />
+        <entry key="..\:/MyCinema/app/src/main/res/menu/main_menu.xml" value="0.31354166666666666" />
         <entry key="..\:/Users/User/MyCinema/app/src/main/res/layout/account.xml" value="0.20516304347826086" />
         <entry key="..\:/Users/User/MyCinema/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/Users/User/MyCinema/app/src/main/res/layout/film_item.xml" value="0.20516304347826086" />

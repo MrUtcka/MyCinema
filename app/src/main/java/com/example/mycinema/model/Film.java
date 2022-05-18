@@ -12,7 +12,7 @@ public class Film {
     @DatabaseField(canBeNull = false)
     private String name;
 
-    @DatabaseField(canBeNull = true)
+    @DatabaseField
     private String description;
 
     @DatabaseField(foreign = true)
