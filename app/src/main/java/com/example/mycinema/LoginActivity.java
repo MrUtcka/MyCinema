@@ -3,6 +3,7 @@ package com.example.mycinema;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,7 +51,7 @@ public class LoginActivity extends Activity {
         registration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(email.getText() != null && password.getText() != null) {
+                if(email.getText() != null && password.getText() != null && emailValidator(email)) {
                     try {
                         roleDao = HelperFactory.getHelper().getRoleDao();
                         roles = roleDao.queryForAll();
@@ -68,9 +69,6 @@ public class LoginActivity extends Activity {
                     try {
                         userDao.create(user);
                         Toast.makeText(getApplicationContext(), "Успешно!", Toast.LENGTH_LONG).show();
-                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                        i.putExtra("role", "user");
-                        startActivity(i);
                     } catch (Exception throwables) {
                         throwables.printStackTrace();
                         Toast.makeText(getApplicationContext(), "Ошибка!", Toast.LENGTH_LONG).show();
@@ -92,19 +90,44 @@ public class LoginActivity extends Activity {
                 }
                 Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 if(user != null && password.getText() != null && user.getPassword().equals(password.getText().toString()) && isAdmin()) {
-                    user.setRole(roles.get(0));
+                    user.setRole(roles.get(user.getRole().getId() - 1));
+                    try {
+                        userDao.update(user);
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
                     Toast.makeText(getApplicationContext(), user.getRole().getRole(), Toast.LENGTH_LONG).show();
                     i.putExtra("role", "admin");
+                    i.putExtra("user", email.getText().toString());
                     startActivity(i);
                 }
                 else if(user != null && password.getText() != null && user.getPassword().equals(password.getText().toString()) && !isAdmin()) {
                     user.setRole(roles.get(1));
+                    try {
+                        userDao.update(user);
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
                     Toast.makeText(getApplicationContext(), user.getRole().getRole(), Toast.LENGTH_LONG).show();
                     i.putExtra("role", "user");
+                    i.putExtra("user", email.getText().toString());
                     startActivity(i);
                 }
             }
         });
+    }
+
+    public boolean emailValidator(EditText etMail) {
+
+        String emailToText = etMail.getText().toString();
+
+        if (!emailToText.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(emailToText).matches()) {
+            Toast.makeText(this, "Успешно!", Toast.LENGTH_SHORT).show();
+            return true;
+        } else {
+            Toast.makeText(this, "Введите верную почту!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
     public boolean isAdmin() {

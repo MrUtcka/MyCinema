@@ -1,7 +1,10 @@
 package com.example.mycinema.viewModel;
 
+import android.graphics.Bitmap;
+
 import com.example.mycinema.model.Genre;
 import com.example.mycinema.model.Schedule;
+import com.j256.ormlite.field.DatabaseField;
 
 
 public class FilmViewModel {
@@ -17,6 +20,16 @@ public class FilmViewModel {
     private Genre genre;
 
     private Integer genreId;
+
+    private int image;
+
+    public int getImage() {
+        return image;
+    }
+
+    public void setImage(int image) {
+        this.image = image;
+    }
 
     public String getScheduleTime() {
         return schedule.getDate().toString();

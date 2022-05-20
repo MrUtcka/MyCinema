@@ -5,34 +5,31 @@
     android:orientation="vertical"
     android:background="#e4e4e4">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/main_ico"></ImageView>
-
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/dateCreate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textEmailAddress" />
+        android:inputType="date" />
 
     <EditText
-        android:id="@+id/password"
+        android:id="@+id/timeCreate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPassword" />
+        android:inputType="time" />
+
+    <Spinner
+        android:id="@+id/film"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <Button
-        android:id="@+id/login"
+        android:id="@+id/create"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="ВХОД" />
+        android:text="Создать" />
 
-    <Button
-        android:id="@+id/register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="РЕГИСТРАЦИЯ" />
 </LinearLayout>
+
+

@@ -21,6 +21,17 @@ public class Film {
     @DatabaseField(canBeNull = true)
     private Integer genreId;
 
+    @DatabaseField
+    private int image;
+
+    public int getImage() {
+        return image;
+    }
+
+    public void setImage(int image) {
+        this.image = image;
+    }
+
     public Integer getId() {
         return id;
     }

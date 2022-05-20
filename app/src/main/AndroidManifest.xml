@@ -5,7 +5,7 @@
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ico"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -24,6 +24,8 @@
         <activity android:name=".AccountActivity"></activity>
         <activity android:name=".MainActivity"></activity>
         <activity android:name=".AddActivity"></activity>
+        <activity android:name=".ScheduleActivity"></activity>
+        <activity android:name=".InfoActivity"></activity>
     </application>
 
 </manifest>

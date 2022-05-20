@@ -25,6 +25,14 @@ public class User {
     @DatabaseField(foreign = true)
     private Role role;
 
+    public Collection<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(Collection<Booking> bookings) {
+        this.bookings = bookings;
+    }
+
     @ForeignCollectionField(eager = true)
     private Collection<Booking> bookings;
 

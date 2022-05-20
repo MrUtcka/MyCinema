@@ -22,24 +22,19 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mycinema.model.Film;
 import com.example.mycinema.model.Genre;
-import com.example.mycinema.model.Role;
 import com.example.mycinema.model.Schedule;
-import com.example.mycinema.model.User;
 import com.example.mycinema.viewModel.FilmViewModel;
-import com.google.android.material.navigation.NavigationView;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -47,12 +42,15 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinner;
     GenreDAO genreDao;
     FilmDAO filmDao;
+    String email;
     String role;
     String selected;
     List<FilmViewModel> films;
+    List<Integer> id = new ArrayList<Integer>();
     //FilmAdapter filmAdapter;
 
     List<String> items = new ArrayList<>();
+    List<String> filmsForShow = new ArrayList<>();
     ArrayList<String> listItems;
     ArrayAdapter<String> searchAdapter;
     ListView listView;
@@ -67,9 +65,12 @@ public class MainActivity extends AppCompatActivity {
         List<String> genresList = new ArrayList<String>();
         films = new ArrayList<FilmViewModel>();
 
+        filmsForShow.add("Пила");
+
         Bundle arguments = getIntent().getExtras();
 
         if(arguments != null) {
+            email = arguments.getString("user");
             role = arguments.getString("role");
         }
 
@@ -78,40 +79,40 @@ public class MainActivity extends AppCompatActivity {
             filmDao = HelperFactory.getHelper().getFilmDao();
             genres = genreDao.queryForAll();
             List<Film> filmsList = filmDao.queryForAll();
+            for (Genre item: genres) {
+                genresList.add(item.getName());
+            }
             for (Film item: filmsList){
                 FilmViewModel filmViewModel = new FilmViewModel();
                 filmViewModel.setName(item.getName());
                 filmViewModel.setGenre(item.getGenre());
                 filmViewModel.setId(item.getId());
-                Schedule date = new Schedule();
-                date.setDate(new Date());
                 items.add(item.getName());
-                filmViewModel.setSchedule(date);
+                filmViewModel.setImage(item.getImage());
                 filmViewModel.setDescription(item.getDescription());
                 films.add(filmViewModel);
             }
-            for (Genre item: genres) {
-                genresList.add(item.getName());
+            for (FilmViewModel item: films){
+                id.add(item.getGenre().getId());
+            }
+            for (int i = 0; i < id.size(); i++) {
+                films.get(i).getGenre().setName(genresList.get(id.get(i) - 1));
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
 
-        FilmAdapter.OnFilmClickListener filmClickListener = new FilmAdapter.OnFilmClickListener() {
-            @Override
-            public void onFilmClick(FilmViewModel film, int position) {
-                Intent i = new Intent(getApplicationContext(), ViewActivity.class);
-                i.putExtra("name", film.getName());
-                i.putExtra("description", film.getDescription());
-                i.putExtra("genre", film.getGenre().getName());
-                startActivity(i);
-            }
-        };
-
-        /*RecyclerView recyclerView = findViewById(R.id.filmRecyclingView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        filmAdapter = new FilmAdapter(this, films, filmClickListener);
-        recyclerView.setAdapter(filmAdapter);*/
+//        FilmAdapter.OnFilmClickListener filmClickListener = new FilmAdapter.OnFilmClickListener() {
+//            @Override
+//            public void onFilmClick(FilmViewModel film, int position) {
+//                Intent i = new Intent(getApplicationContext(), ViewActivity.class);
+//                i.putExtra("user", email);
+//                i.putExtra("name", film.getName());
+//                i.putExtra("description", film.getDescription());
+//                i.putExtra("genre", film.getGenre().getName());
+//                startActivity(i);
+//            }
+//        };
 
         spinner = findViewById(R.id.spGenre);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -123,8 +124,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 selected = spinner.getSelectedItem().toString();
+                filmsForShow.clear();
+                for (FilmViewModel item: films) {
+                    if(item.getGenre().getName().equals(selected))
+                        filmsForShow.add(item.getName());
+                }
 
-                Toast.makeText(getApplicationContext(), selected, Toast.LENGTH_SHORT).show();
+                listView.setAdapter(null);
+                listView.setAdapter(searchAdapter);
             }
 
             @Override
@@ -160,26 +167,40 @@ public class MainActivity extends AppCompatActivity {
         });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            FilmViewModel currfilm;
+            FilmViewModel currFilm;
+            String filmName;
             @Override
             public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
-                Toast.makeText(getApplicationContext(), String.valueOf(position), Toast.LENGTH_LONG).show();
-                currfilm = films.get(position);
+                filmName = listItems.get(position);
+                currFilm = film(filmName);
+
                 Intent i = new Intent(getApplicationContext(), ViewActivity.class);
-                i.putExtra("name", currfilm.getName());
-                i.putExtra("description", currfilm.getDescription());
-                i.putExtra("genre", currfilm.getGenre().getName());
+                i.putExtra("name", currFilm.getName());
+                i.putExtra("description", currFilm.getDescription());
+                i.putExtra("genre", currFilm.getGenre().getName());
+                i.putExtra("image", currFilm.getImage());
+                i.putExtra("user", email);
+                i.putExtra("role", role);
+
                 startActivity(i);
             }
         });
     }
 
+    public FilmViewModel film(String currFilm) {
+        for (FilmViewModel item: films){
+            if(item.getName().equals(currFilm)) {
+                return item;
+            }
+        }
+        return films.get(0);
+    }
+
     public void searchItem(String textToSearch){
         int i = 0;
         for(String item:items){
-            if(!item.contains(textToSearch) && !selected.equals(films.get(i).getGenre().getName())){
+            if(!item.contains(textToSearch) && !selected.equals(films.get(i).getGenre().getName()) ){
                 listItems.remove(item);
-
             }
             i++;
         }
@@ -191,7 +212,8 @@ public class MainActivity extends AppCompatActivity {
         for (String item: items) {
             listItems.add(item);
         }
-        searchAdapter=new ArrayAdapter<String>(this, R.layout.film_item, R.id.name, listItems);
+        //searchAdapter=new ArrayAdapter<String>(this, R.layout.film_item, R.id.name, listItems);
+        searchAdapter=new ArrayAdapter<String>(this, R.layout.film_item, R.id.name, filmsForShow);
         listView.setAdapter(searchAdapter);
     }
 
@@ -206,69 +228,24 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item)
     {
         int i = item.getItemId();
-        if(i == R.id.action && role.equals("admin")) {
+        if(i == R.id.addFilm && role.equals("admin")) {
             Intent intent = new Intent(getApplicationContext(), AddActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        else if(i == R.id.addSchedule && role.equals("admin")) {
+            Intent intent = new Intent(getApplicationContext(), ScheduleActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        else if(i == R.id.info) {
+            Intent intent = new Intent(getApplicationContext(), InfoActivity.class);
+            intent.putExtra("email", email);
             startActivity(intent);
             return true;
         }
         else {
             return super.onOptionsItemSelected(item);
-        }
-    }
-}
-
-class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.ViewHolder> {
-
-    private final LayoutInflater inflater;
-    private final List<FilmViewModel> films;
-    private final OnFilmClickListener onClickListener;
-
-    interface OnFilmClickListener{
-        void onFilmClick(FilmViewModel film, int position);
-    }
-
-    FilmAdapter(Context context, List<FilmViewModel> films, OnFilmClickListener onClickListener) {
-        this.onClickListener = onClickListener;
-        this.films = films;
-        this.inflater = LayoutInflater.from(context);
-    }
-
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.film_item, parent, false);
-        return new ViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        FilmViewModel film = films.get(position);
-        holder.imageView.setImageResource(R.drawable.ic_launcher_background);
-        holder.nameView.setText(film.getName());
-        holder.timeView.setText(film.getScheduleTime());
-
-        holder.itemView.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v)
-            {
-                onClickListener.onFilmClick(film, position);
-            }
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return films.size();
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        final ImageView imageView;
-        final TextView nameView, timeView;
-        ViewHolder(View view){
-            super(view);
-            imageView = view.findViewById(R.id.icon);
-            nameView = view.findViewById(R.id.name);
-            timeView = view.findViewById(R.id.date);
         }
     }
 }
